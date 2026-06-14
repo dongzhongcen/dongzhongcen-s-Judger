@@ -1,0 +1,133 @@
+{
+  "name": "dzc-writer",
+  "displayName": "dongzhongcen's Jugder",
+  "description": "AI solution generation plus local competitive programming test runner for VS Code.",
+  "version": "0.3.4",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*",
+    "onView:dzcWriter.panel",
+    "onCommand:dzcWriter.toggleGoalMode",
+    "onCommand:dzcWriter.generateForActiveFile",
+    "onCommand:dzcWriter.applyLastResult",
+    "onCommand:dzcWriter.showDetectedPrompt"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "dzcWriter.toggleGoalMode",
+        "title": "dzc Writer: Toggle Goal Mode"
+      },
+      {
+        "command": "dzcWriter.generateForActiveFile",
+        "title": "dzc Writer: Generate For Active File"
+      },
+      {
+        "command": "dzcWriter.applyLastResult",
+        "title": "dzc Writer: Apply Last Result"
+      },
+      {
+        "command": "dzcWriter.showDetectedPrompt",
+        "title": "dzc Writer: Show Detected Problem Comment"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dzcWriter",
+          "title": "dongzhongcen's Jugder",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "dzcWriter": [
+        {
+          "id": "dzcWriter.panel",
+          "name": "Local",
+          "type": "webview"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "dzc Writer",
+      "properties": {
+        "dzcWriter.model": {
+          "type": "string",
+          "default": "gpt-4.1",
+          "description": "OpenAI model used to generate code."
+        },
+        "dzcWriter.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API key. Prefer setting OPENAI_API_KEY in your environment instead."
+        },
+        "dzcWriter.apiBaseUrl": {
+          "type": "string",
+          "default": "https://api.openai.com/v1",
+          "description": "OpenAI-compatible API base URL."
+        },
+        "dzcWriter.autoGenerate": {
+          "type": "boolean",
+          "default": false,
+          "description": "When goal mode is on, automatically generate after detecting a changed leading document comment."
+        },
+        "dzcWriter.confirmBeforeApply": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask before replacing the active editor content."
+        },
+        "dzcWriter.debounceMs": {
+          "type": "number",
+          "default": 1200,
+          "description": "Delay before reacting to active document changes while goal mode is on."
+        },
+        "dzcWriter.maxInputChars": {
+          "type": "number",
+          "default": 20000,
+          "description": "Maximum characters from the active file sent to the model."
+        },
+        "dzcWriter.uiLanguage": {
+          "type": "string",
+          "enum": ["en", "zh"],
+          "default": "en",
+          "description": "Sidebar UI language."
+        },
+        "dzcWriter.runTimeoutMs": {
+          "type": "number",
+          "default": 5000,
+          "description": "Timeout for local test execution."
+        },
+        "dzcWriter.cppCompileCommand": {
+          "type": "string",
+          "default": "g++ -std=c++17 -O2 \"${file}\" -o \"${exe}\"",
+          "description": "Compile command for C++ files. Variables: ${file}, ${exe}."
+        },
+        "dzcWriter.javaCompileCommand": {
+          "type": "string",
+          "default": "javac \"${file}\"",
+          "description": "Compile command for Java files. Variable: ${file}."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.9.2",
+    "typescript": "^5.4.5"
+  }
+}
+
