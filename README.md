@@ -80,6 +80,36 @@ Add your API key:
 }
 ```
 
+Full example:
+
+```json
+{
+  "dzcWriter.apiKey": "YOUR_OPENAI_API_KEY",
+  "dzcWriter.model": "gpt-4.1",
+  "dzcWriter.confirmBeforeApply": true,
+  "dzcWriter.apiBaseUrl": "https://api.openai.com/v1",
+  "dzcWriter.uiLanguage": "en"
+}
+```
+
+Field meaning:
+
+- `dzcWriter.apiKey`: Your OpenAI API key. Do not share it or commit it to GitHub.
+- `dzcWriter.model`: The model used to generate code.
+- `dzcWriter.confirmBeforeApply`: Whether to ask before replacing the editor content.
+- `dzcWriter.apiBaseUrl`: API base URL. Default is the official OpenAI endpoint.
+- `dzcWriter.uiLanguage`: Sidebar language. Use `"en"` or `"zh"`.
+
+If you use a compatible proxy or relay service, change only `apiBaseUrl`:
+
+```json
+{
+  "dzcWriter.apiBaseUrl": "https://your-api-host.example.com/v1"
+}
+```
+
+Use the new `dzcWriter.*` settings. Old `codexGoalWriter.*` settings are no longer used.
+
 Then reload VS Code:
 
 ```text
