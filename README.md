@@ -58,6 +58,42 @@ Line comments are also supported:
 
 Set `OPENAI_API_KEY` in your environment, or configure `dzcWriter.apiKey` in VS Code settings.
 
+### Configure API Key In VS Code
+
+Open VS Code command palette:
+
+```text
+Ctrl + Shift + P
+```
+
+Run:
+
+```text
+Preferences: Open User Settings (JSON)
+```
+
+Add your API key:
+
+```json
+{
+  "dzcWriter.apiKey": "YOUR_OPENAI_API_KEY"
+}
+```
+
+Then reload VS Code:
+
+```text
+Ctrl + Shift + P -> Developer: Reload Window
+```
+
+You can also use an environment variable instead:
+
+```powershell
+setx OPENAI_API_KEY "YOUR_OPENAI_API_KEY"
+```
+
+Restart VS Code after setting the environment variable.
+
 Important settings:
 
 - `dzcWriter.model`
