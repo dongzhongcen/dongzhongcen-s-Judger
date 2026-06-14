@@ -70,6 +70,52 @@ Important settings:
 - `dzcWriter.cppCompileCommand`
 - `dzcWriter.javaCompileCommand`
 
+## Build VS Code Extension
+
+Users can build this project into a VS Code plugin package (`.vsix`) locally.
+
+Prerequisites:
+
+- VS Code
+- Node.js
+- npm
+
+Steps:
+
+```bash
+git clone https://github.com/dongzhongcen/dongzhongcen-s-Judger.git
+cd dongzhongcen-s-Judger
+npm install
+npm run compile
+npm run package
+```
+
+After packaging, a file like this will be generated:
+
+```text
+dzc-writer-0.3.4.vsix
+```
+
+Install it in VS Code:
+
+```bash
+code --install-extension dzc-writer-0.3.4.vsix
+```
+
+Or install from the VS Code UI:
+
+```text
+Extensions -> ... -> Install from VSIX...
+```
+
+Then reload VS Code:
+
+```text
+Ctrl + Shift + P -> Developer: Reload Window
+```
+
+For normal users, the easiest way is to download the `.vsix` file from GitHub Releases if a release is available.
+
 ## Local Judge
 
 C++ default compile command:
