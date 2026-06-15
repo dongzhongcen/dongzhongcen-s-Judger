@@ -795,29 +795,45 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
       --muted: var(--vscode-descriptionForeground);
     }
     * { box-sizing: border-box; }
+    html {
+      width: 100%;
+      height: 100%;
+    }
     body {
       margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
       font-family: var(--vscode-font-family);
       font-size: var(--vscode-font-size);
       color: var(--text);
       background: var(--surface);
     }
+    button,
+    textarea {
+      max-width: 100%;
+    }
     .wrap {
-      min-height: 100vh;
+      width: 100%;
+      min-width: 0;
+      height: 100vh;
+      overflow: auto;
       display: flex;
       flex-direction: column;
-      padding: 10px 8px;
+      padding: clamp(6px, 2.5vw, 10px) clamp(6px, 2.5vw, 8px);
       gap: 10px;
     }
     .top {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
       gap: 8px;
       padding: 2px 4px 8px;
       border-bottom: 1px solid var(--border);
     }
     .title {
+      flex: 1 1 140px;
       font-size: 17px;
       font-weight: 700;
       min-width: 0;
@@ -840,21 +856,25 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
       background: var(--vscode-button-secondaryBackground);
       color: var(--vscode-button-secondaryForeground);
       font-weight: 600;
+      white-space: nowrap;
     }
     .panel {
-      border-left: 6px solid var(--vscode-focusBorder);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 10px 12px;
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--border);
+      padding: clamp(8px, 2.8vw, 10px);
       background: color-mix(in srgb, var(--surface) 92%, var(--text));
     }
     .panel-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 10px;
     }
     .panel-title-left {
+      flex: 1 1 150px;
       display: flex;
       align-items: center;
       min-width: 0;
@@ -872,18 +892,28 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
       cursor: pointer;
     }
     .panel-name {
+      min-width: 0;
       display: flex;
       align-items: center;
       gap: 8px;
       color: var(--vscode-textLink-foreground);
       font-size: 16px;
       font-weight: 700;
+      overflow-wrap: anywhere;
     }
     .chev { font-size: 18px; color: var(--text); }
-    .icon-row { display: flex; gap: 6px; flex: 0 0 auto; }
+    .icon-row {
+      display: flex;
+      flex: 0 1 auto;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+      min-width: 0;
+    }
     .icon-btn {
       width: 38px;
       height: 36px;
+      flex: 0 0 38px;
       border: 0;
       border-radius: 4px;
       display: grid;
@@ -898,6 +928,9 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
     .label-line {
       display: flex;
       justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 6px;
       margin: 9px 0 4px;
       font-size: 14px;
     }
@@ -918,19 +951,23 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
       white-space: pre-wrap;
       overflow: auto;
       max-height: 190px;
+      overflow-wrap: anywhere;
     }
     .summary {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 8px;
       align-items: center;
       min-height: 36px;
       border: 1px solid var(--vscode-input-border, var(--border));
       background: var(--field);
       padding: 8px;
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
     .actions {
       display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
       gap: 8px;
       padding: 6px 8px 0;
     }
@@ -945,6 +982,8 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
       font-size: 15px;
       font-weight: 650;
       cursor: pointer;
+      width: 100%;
+      overflow-wrap: anywhere;
     }
     .primary { background: var(--green); }
     .primary:hover { background: var(--green-hover); }
@@ -976,17 +1015,20 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
     .test-list {
       display: grid;
       gap: 10px;
+      min-width: 0;
     }
     .test-card {
-      border-left: 6px solid color-mix(in srgb, var(--vscode-focusBorder) 70%, transparent);
-      border-bottom: 1px solid var(--border);
-      padding: 10px;
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--border);
+      padding: clamp(8px, 2.8vw, 10px);
       background: color-mix(in srgb, var(--surface) 94%, var(--text));
     }
     .test-title {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
       gap: 8px;
       color: var(--vscode-textLink-foreground);
       font-size: 15px;
@@ -1004,6 +1046,7 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
       font-family: var(--vscode-editor-font-family);
       font-size: 12px;
       line-height: 1.4;
+      overflow-wrap: anywhere;
     }
     .result {
       margin-top: 8px;
@@ -1015,13 +1058,16 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
       white-space: pre-wrap;
       max-height: 120px;
       overflow: auto;
+      overflow-wrap: anywhere;
     }
     .status-pill {
+      max-width: 100%;
       padding: 3px 7px;
       border-radius: 999px;
       color: white;
       font-size: 12px;
       background: var(--muted);
+      overflow-wrap: anywhere;
     }
     .passed { background: var(--green); }
     .failed, .error { background: var(--danger); }
@@ -1057,6 +1103,40 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
       color: var(--muted);
       font-size: 12px;
       overflow-wrap: anywhere;
+    }
+    @media (max-width: 300px) {
+      .wrap {
+        padding: 6px;
+      }
+      .top,
+      .panel-head {
+        align-items: stretch;
+      }
+      .lang,
+      .collapse-btn,
+      .ghost {
+        min-height: 32px;
+      }
+      .summary {
+        grid-template-columns: 1fr;
+      }
+      .ghost {
+        width: 100%;
+      }
+      .icon-row {
+        width: 100%;
+      }
+      .icon-btn {
+        flex: 1 1 34px;
+      }
+      .counter {
+        white-space: normal;
+      }
+      .actions {
+        grid-template-columns: 1fr;
+        padding-left: 0;
+        padding-right: 0;
+      }
     }
   </style>
 </head>
