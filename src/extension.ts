@@ -773,6 +773,8 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
     const detectedText = hasPrompt ? t.detected : t.notDetected;
     const aiBodyStyle = aiPanelOpen ? '' : 'style="display:none"';
     const aiArrow = aiPanelOpen ? 'v' : '>';
+    const listenTitle = goalMode ? t.stopWatch : t.startWatch;
+    const listenClass = goalMode ? 'listen active' : 'listen';
     return `<!DOCTYPE html>
 <html lang="${language === 'en' ? 'en' : 'zh-CN'}">
 <head>
@@ -848,6 +850,27 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
       background: var(--vscode-button-secondaryBackground);
       color: var(--vscode-button-secondaryForeground);
       cursor: pointer;
+    }
+    .top-actions {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 6px;
+    }
+    .listen {
+      min-width: 34px;
+      min-height: 28px;
+      border: 1px solid var(--vscode-input-border, var(--border));
+      border-radius: 5px;
+      background: var(--vscode-button-secondaryBackground);
+      color: var(--vscode-button-secondaryForeground);
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .listen.active {
+      border-color: var(--green);
+      background: color-mix(in srgb, var(--green) 24%, var(--vscode-button-secondaryBackground));
+      color: var(--text);
     }
     .counter {
       flex: 0 0 auto;
@@ -1113,6 +1136,7 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
         align-items: stretch;
       }
       .lang,
+      .listen,
       .collapse-btn,
       .ghost {
         min-height: 32px;
@@ -1144,7 +1168,10 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
   <div class="wrap">
     <div class="top">
       <div class="title">${escapeHtml(t.local)}: ${escapeHtml(fileName)}</div>
-      <button class="lang" data-action="setLanguage" data-language="${nextLanguage}">${language === 'en' ? 'ZH' : 'EN'}</button>
+      <div class="top-actions">
+        <button class="${listenClass}" title="${escapeHtml(listenTitle)}" aria-label="${escapeHtml(listenTitle)}" data-action="toggleGoalMode">SL</button>
+        <button class="lang" data-action="setLanguage" data-language="${nextLanguage}">${language === 'en' ? 'ZH' : 'EN'}</button>
+      </div>
     </div>
 
     <section class="panel">
@@ -1153,7 +1180,7 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
           <button class="collapse-btn" data-action="toggleAiPanel">${aiArrow}</button>
           <div class="panel-name"><span>${escapeHtml(t.query)}</span></div>
         </div>
-        <button class="icon-btn play" title="${escapeHtml(t.startWatch)}" data-action="toggleGoalMode">&#9654;</button>
+        <button class="icon-btn play" title="${escapeHtml(t.generateForActiveFile)}" aria-label="${escapeHtml(t.generateForActiveFile)}" data-action="generate">&#9654;</button>
       </div>
 
       <div ${aiBodyStyle}>
@@ -1265,6 +1292,7 @@ const labels = {
     chars: 'chars',
     viewContent: 'View content',
     generate: 'Generate',
+    generateForActiveFile: 'Generate for active file',
     startWatch: 'Start listening',
     stopWatch: 'Stop listening',
     tests: 'Testcases',
@@ -1291,6 +1319,7 @@ const labels = {
     chars: '\u5b57',
     viewContent: '\u67e5\u770b\u5177\u4f53\u5185\u5bb9',
     generate: '\u751f\u6210',
+    generateForActiveFile: '\u4e3a\u5f53\u524d\u6587\u4ef6\u751f\u6210\u7b54\u6848',
     startWatch: '\u5f00\u59cb\u76d1\u542c',
     stopWatch: '\u505c\u6b62\u76d1\u542c',
     tests: '\u6d4b\u8bd5\u7528\u4f8b',
