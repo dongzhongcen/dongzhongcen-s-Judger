@@ -857,6 +857,7 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
       align-items: center;
       gap: 6px;
     }
+    .top-generate,
     .listen {
       min-width: 34px;
       min-height: 28px;
@@ -866,6 +867,15 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
       color: var(--vscode-button-secondaryForeground);
       font-weight: 700;
       cursor: pointer;
+    }
+    .top-generate {
+      border-color: var(--green);
+      background: var(--green);
+      color: white;
+      font-size: 14px;
+    }
+    .top-generate:hover {
+      background: var(--green-hover);
     }
     .listen.active {
       border-color: var(--green);
@@ -1136,6 +1146,7 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
         align-items: stretch;
       }
       .lang,
+      .top-generate,
       .listen,
       .collapse-btn,
       .ghost {
@@ -1169,6 +1180,7 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
     <div class="top">
       <div class="title">${escapeHtml(t.local)}: ${escapeHtml(fileName)}</div>
       <div class="top-actions">
+        <button class="top-generate" title="${escapeHtml(t.generateForActiveFile)}" aria-label="${escapeHtml(t.generateForActiveFile)}" data-action="generate">&#9654;</button>
         <button class="${listenClass}" title="${escapeHtml(listenTitle)}" aria-label="${escapeHtml(listenTitle)}" data-action="toggleGoalMode">SL</button>
         <button class="lang" data-action="setLanguage" data-language="${nextLanguage}">${language === 'en' ? 'ZH' : 'EN'}</button>
       </div>
