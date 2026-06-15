@@ -43,9 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.registerWebviewViewProvider('dzcWriter.panel', panelProvider),
     vscode.commands.registerCommand('dzcWriter.toggleGoalMode', async () => {
       goalMode = !goalMode;
-      await vscode.window.showInformationMessage(
-        `dzc Writer goal mode ${goalMode ? 'enabled' : 'disabled'}.`
-      );
+      await showOptionalInformationMessage(`dzc Writer goal mode ${goalMode ? 'enabled' : 'disabled'}.`);
       outputChannel.appendLine(`Goal mode: ${goalMode ? 'on' : 'off'}`);
       panelProvider?.refresh();
       if (goalMode) {
@@ -61,7 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('dzcWriter.showDetectedPrompt', async () => {
       const detected = detectPrompt(vscode.window.activeTextEditor?.document);
       if (!detected) {
-        vscode.window.showInformationMessage('No leading problem comment detected.');
+        showOptionalInformationMessage('No leading problem comment detected.');
         return;
       }
       const preview = detected.promptText.length > 1200
@@ -143,7 +141,7 @@ async function inspectAndMaybeGenerate(context: vscode.ExtensionContext, autoTri
   if (!autoTriggered || autoGenerate) {
     await generateAndOptionallyApply(context, editor, detected);
   } else {
-    const action = await vscode.window.showInformationMessage(
+    const action = await showOptionalInformationMessage(
       'Problem comment detected.',
       'Generate',
       'Show Prompt'
@@ -159,7 +157,7 @@ async function inspectAndMaybeGenerate(context: vscode.ExtensionContext, autoTri
 async function generateForActiveEditor(context: vscode.ExtensionContext): Promise<void> {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
-    vscode.window.showInformationMessage('No active editor.');
+    showOptionalInformationMessage('No active editor.');
     return;
   }
 
@@ -167,7 +165,7 @@ async function generateForActiveEditor(context: vscode.ExtensionContext): Promis
   if (!detected) {
     lastDetectedPrompt = null;
     panelProvider?.refresh('No leading document comment detected.');
-    vscode.window.showInformationMessage('No leading document comment detected.');
+    showOptionalInformationMessage('No leading document comment detected.');
     return;
   }
 
@@ -331,7 +329,7 @@ async function generateAndOptionallyApply(
   const cleaned = cleanGeneratedText(generated);
   lastGeneratedText = cleaned;
 
-  const confirmBeforeApply = vscode.workspace.getConfiguration('dzcWriter').get<boolean>('confirmBeforeApply', true);
+  const confirmBeforeApply = vscode.workspace.getConfiguration('dzcWriter').get<boolean>('confirmBeforeApply', false);
   if (confirmBeforeApply) {
     const choice = await vscode.window.showInformationMessage(
       'Append generated answer to the active file?',
@@ -447,18 +445,18 @@ async function appendGeneratedTextToEditor(
     throw new Error('Failed to append generated text.');
   }
   lastGeneratedText = generated;
-  await vscode.window.showInformationMessage('Generated answer appended to active file.');
+  await showOptionalInformationMessage('Generated answer appended to active file.');
   outputChannel.appendLine(`Appended generated text for prompt starting at line ${detected.promptRange.start.line + 1}.`);
 }
 
 async function applyLastResult() {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
-    vscode.window.showInformationMessage('No active editor.');
+    showOptionalInformationMessage('No active editor.');
     return;
   }
   if (!lastGeneratedText.trim()) {
-    vscode.window.showInformationMessage('No generated result yet.');
+    showOptionalInformationMessage('No generated result yet.');
     return;
   }
   const choice = await vscode.window.showWarningMessage(
@@ -476,7 +474,7 @@ async function applyLastResult() {
   edit.insert(editor.document.uri, endPosition, `${separator}${lastGeneratedText.trim()}\n`);
   const ok = await vscode.workspace.applyEdit(edit);
   if (ok) {
-    vscode.window.showInformationMessage('Last generated result appended.');
+    showOptionalInformationMessage('Last generated result appended.');
   }
 }
 
@@ -710,7 +708,7 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
         if (detected) {
           await showPromptPreview(detected);
         } else {
-          vscode.window.showInformationMessage('No leading document comment detected.');
+          showOptionalInformationMessage('No leading document comment detected.');
         }
       }
       if (message?.type === 'applyLast') {
@@ -1341,6 +1339,15 @@ function escapeHtml(value: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function showOptionalInformationMessage(message: string, ...items: string[]): Thenable<string | undefined> {
+  const enabled = vscode.workspace.getConfiguration('dzcWriter').get<boolean>('showNotifications', false);
+  if (!enabled) {
+    outputChannel.appendLine(message);
+    return Promise.resolve(undefined);
+  }
+  return vscode.window.showInformationMessage(message, ...items);
 }
 
 function createNonce(): string {

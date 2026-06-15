@@ -2,7 +2,7 @@
   "name": "dzc-writer",
   "displayName": "dongzhongcen's Jugder",
   "description": "AI solution generation plus local competitive programming test runner for VS Code.",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "publisher": "local",
   "engines": {
     "vscode": "^1.90.0"
@@ -81,8 +81,13 @@
         },
         "dzcWriter.confirmBeforeApply": {
           "type": "boolean",
-          "default": true,
-          "description": "Ask before replacing the active editor content."
+          "default": false,
+          "description": "Ask before appending generated content to the active editor."
+        },
+        "dzcWriter.showNotifications": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show non-error VS Code notification messages from this extension."
         },
         "dzcWriter.debounceMs": {
           "type": "number",

@@ -86,7 +86,8 @@ Full example:
 {
   "dzcWriter.apiKey": "YOUR_OPENAI_API_KEY",
   "dzcWriter.model": "gpt-4.1",
-  "dzcWriter.confirmBeforeApply": true,
+  "dzcWriter.confirmBeforeApply": false,
+  "dzcWriter.showNotifications": false,
   "dzcWriter.apiBaseUrl": "https://api.openai.com/v1",
   "dzcWriter.uiLanguage": "en"
 }
@@ -96,7 +97,8 @@ Field meaning:
 
 - `dzcWriter.apiKey`: Your OpenAI API key. Do not share it or commit it to GitHub.
 - `dzcWriter.model`: The model used to generate code.
-- `dzcWriter.confirmBeforeApply`: Whether to ask before replacing the editor content.
+- `dzcWriter.confirmBeforeApply`: Whether to ask before appending generated content.
+- `dzcWriter.showNotifications`: Whether to show non-error VS Code notification messages. Set it to `false` to keep the extension quiet.
 - `dzcWriter.apiBaseUrl`: API base URL. Default is the official OpenAI endpoint.
 - `dzcWriter.uiLanguage`: Sidebar language. Use `"en"` or `"zh"`.
 
@@ -131,6 +133,7 @@ Important settings:
 - `dzcWriter.apiBaseUrl`
 - `dzcWriter.autoGenerate`
 - `dzcWriter.confirmBeforeApply`
+- `dzcWriter.showNotifications`
 - `dzcWriter.uiLanguage`
 - `dzcWriter.runTimeoutMs`
 - `dzcWriter.cppCompileCommand`
