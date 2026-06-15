@@ -2,7 +2,7 @@
   "name": "dzc-writer",
   "displayName": "dongzhongcen's Jugder",
   "description": "AI solution generation plus local competitive programming test runner for VS Code.",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "publisher": "local",
   "engines": {
     "vscode": "^1.90.0"

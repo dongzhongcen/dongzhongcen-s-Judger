@@ -170,10 +170,10 @@ async function generateForActiveEditor(context: vscode.ExtensionContext): Promis
   }
 
   lastDetectedPrompt = detected;
-  panelProvider?.refresh('Generating answer...');
+  panelProvider?.refresh('...');
   try {
     await generateAndOptionallyApply(context, editor, detected);
-    panelProvider?.refresh('Generation finished.');
+    panelProvider?.refresh('');
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     outputChannel.appendLine(message);
@@ -735,7 +735,7 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
   }
 
   refresh(status?: string): void {
-    if (status) {
+    if (typeof status === 'string') {
       this.status = status;
     }
     if (!this.view) {
