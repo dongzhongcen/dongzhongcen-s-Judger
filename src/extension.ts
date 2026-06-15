@@ -328,27 +328,22 @@ async function generateAndOptionallyApply(
   detected: DetectedPrompt
 ) {
   const generated = await generateFromPrompt(editor.document, detected.promptText);
-  lastGeneratedText = generated;
+  const cleaned = cleanGeneratedText(generated);
+  lastGeneratedText = cleaned;
 
   const confirmBeforeApply = vscode.workspace.getConfiguration('dzcWriter').get<boolean>('confirmBeforeApply', true);
-  const previewDoc = await vscode.workspace.openTextDocument({
-    content: generated,
-    language: editor.document.languageId || 'plaintext'
-  });
-  await vscode.window.showTextDocument(previewDoc, { preview: true });
-
   if (confirmBeforeApply) {
     const choice = await vscode.window.showInformationMessage(
-      'Apply generated code to the active editor?',
-      'Apply',
+      'Append generated answer to the active file?',
+      'Append',
       'Cancel'
     );
-    if (choice !== 'Apply') {
+    if (choice !== 'Append') {
       return;
     }
   }
 
-  await applyGeneratedTextToEditor(editor, generated, detected);
+  await appendGeneratedTextToEditor(editor, cleaned, detected);
 }
 
 async function generateFromPrompt(document: vscode.TextDocument, promptText: string): Promise<string> {
@@ -365,7 +360,7 @@ async function generateFromPrompt(document: vscode.TextDocument, promptText: str
   const system = [
     'You are a coding assistant inside VS Code.',
     'Read the problem comment at the top of the file.',
-    'Write only the code that should replace or fill the file body.',
+    'Write only the answer code that should be appended to the current file.',
     'Do not add markdown fences unless the file itself should contain them.',
     'Preserve the user language and naming style when appropriate.',
     'If the comment does not describe a code task, return a short explanation instead of code.'
@@ -431,31 +426,29 @@ function extractResponseText(data: any): string {
   return parts.join('\n');
 }
 
-async function applyGeneratedTextToEditor(
+function cleanGeneratedText(generated: string): string {
+  return generated.includes('```')
+    ? generated.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim()
+    : generated.trim();
+}
+
+async function appendGeneratedTextToEditor(
   editor: vscode.TextEditor,
   generated: string,
   detected: DetectedPrompt
 ) {
   const edit = new vscode.WorkspaceEdit();
-  const fullRange = new vscode.Range(
-    0,
-    0,
-    editor.document.lineCount,
-    0
-  );
-
-  const replacement = generated.includes('```')
-    ? generated.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '')
-    : generated;
-
-  edit.replace(editor.document.uri, fullRange, replacement);
+  const endPosition = editor.document.lineAt(editor.document.lineCount - 1).range.end;
+  const existingText = editor.document.getText();
+  const separator = existingText.endsWith('\n') || existingText.length === 0 ? '\n' : '\n\n';
+  edit.insert(editor.document.uri, endPosition, `${separator}${generated}\n`);
   const success = await vscode.workspace.applyEdit(edit);
   if (!success) {
-    throw new Error('Failed to apply generated text.');
+    throw new Error('Failed to append generated text.');
   }
-  lastGeneratedText = replacement;
-  await vscode.window.showInformationMessage('Generated code applied to file.');
-  outputChannel.appendLine(`Applied generated text for prompt starting at line ${detected.promptRange.start.line + 1}.`);
+  lastGeneratedText = generated;
+  await vscode.window.showInformationMessage('Generated answer appended to active file.');
+  outputChannel.appendLine(`Appended generated text for prompt starting at line ${detected.promptRange.start.line + 1}.`);
 }
 
 async function applyLastResult() {
@@ -469,18 +462,21 @@ async function applyLastResult() {
     return;
   }
   const choice = await vscode.window.showWarningMessage(
-    'Replace the active editor with the last generated result?',
-    'Replace',
+    'Append the last generated result to the active file?',
+    'Append',
     'Cancel'
   );
-  if (choice !== 'Replace') {
+  if (choice !== 'Append') {
     return;
   }
   const edit = new vscode.WorkspaceEdit();
-  edit.replace(editor.document.uri, new vscode.Range(0, 0, editor.document.lineCount, 0), lastGeneratedText);
+  const endPosition = editor.document.lineAt(editor.document.lineCount - 1).range.end;
+  const existingText = editor.document.getText();
+  const separator = existingText.endsWith('\n') || existingText.length === 0 ? '\n' : '\n\n';
+  edit.insert(editor.document.uri, endPosition, `${separator}${lastGeneratedText.trim()}\n`);
   const ok = await vscode.workspace.applyEdit(edit);
   if (ok) {
-    vscode.window.showInformationMessage('Last generated result applied.');
+    vscode.window.showInformationMessage('Last generated result appended.');
   }
 }
 
