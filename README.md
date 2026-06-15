@@ -108,7 +108,7 @@ If you use a compatible proxy or relay service, change only `apiBaseUrl`:
 }
 ```
 
-Use the new `dzcWriter.*` settings. Old `codexGoalWriter.*` settings are no longer used.
+Use the `dzcWriter.*` settings shown above. Older setting names are no longer used.
 
 Then reload VS Code:
 

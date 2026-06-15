@@ -189,24 +189,18 @@ function detectPrompt(document?: vscode.TextDocument | null): DetectedPrompt | n
     return null;
   }
 
-  const lines: string[] = [];
-  const maxLines = Math.min(document.lineCount, 80);
-  for (let i = 0; i < maxLines; i++) {
-    lines.push(document.lineAt(i).text);
-  }
-
-  const joined = lines.join('\n');
-  const trimmed = joined.trimStart();
+  const text = document.getText();
+  const trimmed = text.trimStart();
   if (!trimmed) {
     return null;
   }
 
-  const blockMatch = matchLeadingBlockComment(lines);
+  const blockMatch = matchLeadingBlockComment(document, text);
   if (blockMatch) {
     return blockMatch;
   }
 
-  const lineMatch = matchLeadingLineComments(lines);
+  const lineMatch = matchLeadingLineComments(document);
   if (lineMatch) {
     return lineMatch;
   }
@@ -214,8 +208,10 @@ function detectPrompt(document?: vscode.TextDocument | null): DetectedPrompt | n
   return null;
 }
 
-function matchLeadingBlockComment(lines: string[]): DetectedPrompt | null {
-  const text = lines.join('\n');
+function matchLeadingBlockComment(document: vscode.TextDocument, text: string): DetectedPrompt | null {
+  const leadingWhitespaceLength = text.length - text.trimStart().length;
+  const leadingText = text.slice(leadingWhitespaceLength);
+  const startLine = countLines(text.slice(0, leadingWhitespaceLength));
   const patterns: Array<{ start: RegExp; end: string }> = [
     { start: /^(\s*)\/\*\*?/, end: '*/' },
     { start: /^(\s*)"""/, end: '"""' },
@@ -223,35 +219,41 @@ function matchLeadingBlockComment(lines: string[]): DetectedPrompt | null {
   ];
 
   for (const pattern of patterns) {
-    const startMatch = text.match(pattern.start);
+    const startMatch = leadingText.match(pattern.start);
     if (!startMatch) {
       continue;
     }
     const startLength = startMatch[0].length;
-    const endIndex = text.indexOf(pattern.end, startLength);
+    const endIndex = leadingText.indexOf(pattern.end, startLength);
     if (endIndex < 0) {
       continue;
     }
-    const blockText = text.slice(0, endIndex + pattern.end.length);
+    const endOffset = leadingWhitespaceLength + endIndex + pattern.end.length;
+    const blockText = text.slice(leadingWhitespaceLength, endOffset);
     const promptText = extractPromptText(blockText);
     if (!promptText) {
       continue;
     }
+    const endPosition = document.positionAt(endOffset);
     return {
-      languageId: 'plaintext',
+      languageId: document.languageId || 'plaintext',
       fullText: text,
       promptText,
-      promptRange: new vscode.Range(0, 0, Math.min(lines.length - 1, 50), lines[Math.min(lines.length - 1, 50)]?.length ?? 0),
-      bodyStartLine: Math.min(lines.length, blockText.split('\n').length)
+      promptRange: new vscode.Range(startLine, 0, endPosition.line, endPosition.character),
+      bodyStartLine: endPosition.line + 1
     };
   }
   return null;
 }
 
-function matchLeadingLineComments(lines: string[]): DetectedPrompt | null {
+function matchLeadingLineComments(document: vscode.TextDocument): DetectedPrompt | null {
   const commentLines: string[] = [];
   let sawComment = false;
-  for (const line of lines.slice(0, 20)) {
+  let firstCommentLine = 0;
+  let lastCommentLine = 0;
+
+  for (let lineNumber = 0; lineNumber < document.lineCount; lineNumber++) {
+    const line = document.lineAt(lineNumber).text;
     const trimmed = line.trim();
     if (!trimmed) {
       if (sawComment) {
@@ -260,7 +262,11 @@ function matchLeadingLineComments(lines: string[]): DetectedPrompt | null {
       continue;
     }
     if (/^(#|\/\/|--)/.test(trimmed)) {
+      if (!sawComment) {
+        firstCommentLine = lineNumber;
+      }
       sawComment = true;
+      lastCommentLine = lineNumber;
       commentLines.push(trimmed);
       continue;
     }
@@ -284,12 +290,24 @@ function matchLeadingLineComments(lines: string[]): DetectedPrompt | null {
   }
 
   return {
-    languageId: 'plaintext',
-    fullText: lines.join('\n'),
+    languageId: document.languageId || 'plaintext',
+    fullText: document.getText(),
     promptText,
-    promptRange: new vscode.Range(0, 0, commentLines.length - 1, lines[commentLines.length - 1]?.length ?? 0),
-    bodyStartLine: commentLines.length
+    promptRange: new vscode.Range(
+      firstCommentLine,
+      0,
+      lastCommentLine,
+      document.lineAt(lastCommentLine).text.length
+    ),
+    bodyStartLine: lastCommentLine + 1
   };
+}
+
+function countLines(text: string): number {
+  if (!text) {
+    return 0;
+  }
+  return text.split('\n').length - 1;
 }
 
 function extractPromptText(blockText: string): string {
