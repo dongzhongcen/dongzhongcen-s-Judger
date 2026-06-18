@@ -50,7 +50,7 @@ Line comments are also supported:
 ## Commands
 
 - `dzc Writer: Toggle Goal Mode`
-- `dzc Writer: Generate For Active File`
+- `dzc Writer: Generate For Active File` (`Ctrl+Alt+G`, macOS: `Cmd+Alt+G`)
 - `dzc Writer: Apply Last Result`
 - `dzc Writer: Show Detected Problem Comment`
 

@@ -38,6 +38,14 @@
         "title": "dzc Writer: Show Detected Problem Comment"
       }
     ],
+    "keybindings": [
+      {
+        "command": "dzcWriter.generateForActiveFile",
+        "key": "ctrl+alt+g",
+        "mac": "cmd+alt+g",
+        "when": "editorTextFocus"
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
