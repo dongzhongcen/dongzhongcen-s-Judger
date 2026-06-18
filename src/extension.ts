@@ -328,7 +328,7 @@ async function generateAndOptionallyApply(
   detected: DetectedPrompt
 ) {
   const generated = await generateFromPrompt(editor.document, detected.promptText);
-  const cleaned = cleanGeneratedText(generated);
+  const cleaned = cleanGeneratedText(generated, editor.document.languageId);
   lastGeneratedText = cleaned;
 
   const confirmBeforeApply = vscode.workspace.getConfiguration('dzcWriter').get<boolean>('confirmBeforeApply', false);
@@ -432,10 +432,50 @@ function extractResponseText(data: any): string {
   return parts.join('\n');
 }
 
-function cleanGeneratedText(generated: string): string {
-  return generated.includes('```')
-    ? generated.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim()
-    : generated.trim();
+function cleanGeneratedText(generated: string, languageId: string): string {
+  const fenced = generated.match(/```[a-zA-Z0-9_-]*\s*\n([\s\S]*?)\n?```/);
+  const withoutFences = fenced
+    ? fenced[1]
+    : generated.replace(/^```[a-zA-Z0-9_-]*\n?/i, '').replace(/\n?```$/i, '');
+  return stripNonCodePrefix(withoutFences.trim(), languageId);
+}
+
+function stripNonCodePrefix(text: string, languageId: string): string {
+  const lines = text.replace(/\r\n/g, '\n').split('\n');
+  const codeStart = lines.findIndex((line) => looksLikeCodeStart(line, languageId));
+  return codeStart > 0 ? lines.slice(codeStart).join('\n').trim() : text.trim();
+}
+
+function looksLikeCodeStart(line: string, languageId: string): boolean {
+  const trimmed = line.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  if (/^(#include\b|using\s+namespace\b|using\s+\w+\s*=|typedef\b|template\s*<|class\b|struct\b|enum\b)/.test(trimmed)) {
+    return true;
+  }
+  if (/^((int|long|long long|void|bool|char|string|double|float|auto)\s+)?main\s*\(/.test(trimmed)) {
+    return true;
+  }
+  if (/^(public|private|protected)?\s*(static\s+)?(void|int|long|boolean|String|double|float|char)\s+\w+\s*\(/.test(trimmed)) {
+    return true;
+  }
+  if (/^(import\b|from\s+\S+\s+import\b|def\s+\w+\s*\(|class\s+\w+\b|if\s+__name__\s*==)/.test(trimmed)) {
+    return true;
+  }
+  if (/^(const|let|var|function|async\s+function|export\s+|import\s+|type\s+\w+\s*=|interface\b)/.test(trimmed)) {
+    return true;
+  }
+
+  if (languageId === 'cpp' || languageId === 'c' || languageId === 'java') {
+    return /^(#|[A-Za-z_][\w:<>,\s*&]*\s+[A-Za-z_]\w*\s*\(|[A-Za-z_]\w*\s*=)/.test(trimmed);
+  }
+  if (languageId === 'python') {
+    return /^(def\b|class\b|import\b|from\b|[A-Za-z_]\w*\s*=)/.test(trimmed);
+  }
+
+  return false;
 }
 
 async function appendGeneratedTextToEditor(
