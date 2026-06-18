@@ -87,7 +87,7 @@ Full example:
   "dzcWriter.apiKey": "YOUR_OPENAI_API_KEY",
   "dzcWriter.model": "gpt-4.1",
   "dzcWriter.confirmBeforeApply": false,
-  "dzcWriter.appendMode": "typewriter",
+  "dzcWriter.appendMode": "instant",
   "dzcWriter.typewriterCharsPerTick": 1,
   "dzcWriter.showNotifications": false,
   "dzcWriter.apiBaseUrl": "https://api.openai.com/v1",
@@ -108,7 +108,15 @@ Field meaning:
 
 ### Append Mode
 
-By default, generated content is appended one character at a time with natural programmer-like timing. Normal characters are typed quickly, while line breaks, punctuation, code boundaries, and occasional thinking pauses are slower. A single thinking pause is capped at 10 seconds:
+By default, generated content is appended all at once:
+
+```json
+{
+  "dzcWriter.appendMode": "instant"
+}
+```
+
+To use typewriter mode, set:
 
 ```json
 {
@@ -117,13 +125,7 @@ By default, generated content is appended one character at a time with natural p
 }
 ```
 
-To append generated content all at once:
-
-```json
-{
-  "dzcWriter.appendMode": "instant"
-}
-```
+Typewriter mode appends one character at a time with natural programmer-like timing. Normal characters are typed quickly, while line breaks, punctuation, code boundaries, and occasional thinking pauses are slower. A single thinking pause is capped at 10 seconds.
 
 If you use a compatible proxy or relay service, change only `apiBaseUrl`:
 

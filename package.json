@@ -42,8 +42,7 @@
       {
         "command": "dzcWriter.generateForActiveFile",
         "key": "ctrl+alt+g",
-        "mac": "cmd+alt+g",
-        "when": "editorTextFocus"
+        "mac": "cmd+alt+g"
       }
     ],
     "viewsContainers": {
@@ -95,8 +94,8 @@
         "dzcWriter.appendMode": {
           "type": "string",
           "enum": ["instant", "typewriter"],
-          "default": "typewriter",
-          "description": "How generated content is appended to the active editor. Use typewriter to simulate natural programmer typing."
+          "default": "instant",
+          "description": "How generated content is appended to the active editor. Use instant for one-time append or typewriter to simulate natural programmer typing."
         },
         "dzcWriter.typewriterCharsPerTick": {
           "type": "number",

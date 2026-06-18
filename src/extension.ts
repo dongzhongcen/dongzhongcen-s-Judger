@@ -53,7 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
     }),
     vscode.commands.registerCommand('dzcWriter.generateForActiveFile', async () => {
-      await inspectAndMaybeGenerate(context, false);
+      await generateForActiveEditor(context);
     }),
     vscode.commands.registerCommand('dzcWriter.applyLastResult', async () => {
       await applyLastResult();
@@ -494,7 +494,7 @@ async function appendTextToEditor(editor: vscode.TextEditor, text: string): Prom
   const separator = existingText.endsWith('\n') || existingText.length === 0 ? '\n' : '\n\n';
   const content = `${separator}${text.trim()}\n`;
   const config = vscode.workspace.getConfiguration('dzcWriter');
-  const appendMode = config.get<AppendMode>('appendMode', 'typewriter');
+  const appendMode = config.get<AppendMode>('appendMode', 'instant');
 
   if (appendMode !== 'typewriter') {
     await insertTextAtDocumentEnd(editor, content);
