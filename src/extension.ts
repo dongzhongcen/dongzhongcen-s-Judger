@@ -465,29 +465,44 @@ async function appendTextToEditor(editor: vscode.TextEditor, text: string): Prom
     const chunk = content.slice(index, index + charsPerTick);
     await insertTextAtDocumentEnd(editor, chunk);
     if (index + charsPerTick < content.length) {
-      await delay(getTypingDelayMs(chunk));
+      await delay(getThinkingDelayMs(chunk, content.slice(index + charsPerTick)));
     }
   }
 }
 
-function getTypingDelayMs(text: string): number {
-  const lastChar = text[text.length - 1] ?? '';
-  let min = 35;
-  let max = 120;
+function getThinkingDelayMs(writtenText: string, remainingText: string): number {
+  const writtenChar = writtenText[writtenText.length - 1] ?? '';
+  const nextChar = remainingText[0] ?? '';
 
-  if (lastChar === '\n') {
-    min = 280;
-    max = 900;
-  } else if (/[{}[\]();,.:]/.test(lastChar)) {
-    min = 120;
-    max = 360;
-  } else if (/\s/.test(lastChar)) {
-    min = 45;
-    max = 170;
+  let min = 30;
+  let max = 140;
+
+  if (writtenChar === '\n') {
+    min = 420;
+    max = 1600;
+  } else if (/[{}[\]();,.:]/.test(writtenChar)) {
+    min = 180;
+    max = 620;
+  } else if (/\s/.test(writtenChar)) {
+    min = 55;
+    max = 220;
   }
 
-  const delayMs = randomInt(min, max);
-  return Math.random() < 0.035 ? delayMs + randomInt(500, 1800) : delayMs;
+  if (/[)}\]]/.test(writtenChar) || nextChar === '\n') {
+    min += 80;
+    max += 260;
+  }
+
+  let delayMs = randomInt(min, max);
+
+  if (Math.random() < 0.12) {
+    delayMs += randomInt(700, 2800);
+  }
+  if (Math.random() < 0.03) {
+    delayMs += randomInt(3000, 10000);
+  }
+
+  return Math.min(delayMs, 10000);
 }
 
 function randomInt(min: number, max: number): number {
