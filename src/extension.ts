@@ -455,15 +455,39 @@ async function appendTextToEditor(editor: vscode.TextEditor, text: string): Prom
     return;
   }
 
-  const intervalMs = Math.max(0, config.get<number>('typewriterIntervalMs', 1000));
   const charsPerTick = Math.max(1, config.get<number>('typewriterCharsPerTick', 1));
 
   for (let index = 0; index < content.length; index += charsPerTick) {
-    await insertTextAtDocumentEnd(editor, content.slice(index, index + charsPerTick));
+    const chunk = content.slice(index, index + charsPerTick);
+    await insertTextAtDocumentEnd(editor, chunk);
     if (index + charsPerTick < content.length) {
-      await delay(intervalMs);
+      await delay(getTypingDelayMs(chunk));
     }
   }
+}
+
+function getTypingDelayMs(text: string): number {
+  const lastChar = text[text.length - 1] ?? '';
+  let min = 35;
+  let max = 120;
+
+  if (lastChar === '\n') {
+    min = 280;
+    max = 900;
+  } else if (/[{}[\]();,.:]/.test(lastChar)) {
+    min = 120;
+    max = 360;
+  } else if (/\s/.test(lastChar)) {
+    min = 45;
+    max = 170;
+  }
+
+  const delayMs = randomInt(min, max);
+  return Math.random() < 0.035 ? delayMs + randomInt(500, 1800) : delayMs;
+}
+
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 async function insertTextAtDocumentEnd(editor: vscode.TextEditor, text: string): Promise<void> {
@@ -1196,7 +1220,6 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
       <div class="panel-head">
         <div class="panel-title-left">
           <button class="collapse-btn" data-action="toggleAiPanel">${aiArrow}</button>
-          <div class="panel-name"><span>${escapeHtml(t.query)}</span></div>
         </div>
         <button class="icon-btn play" title="${escapeHtml(t.generateForActiveFile)}" aria-label="${escapeHtml(t.generateForActiveFile)}" data-action="generate">&#9654;</button>
       </div>

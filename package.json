@@ -88,17 +88,12 @@
           "type": "string",
           "enum": ["instant", "typewriter"],
           "default": "typewriter",
-          "description": "How generated content is appended to the active editor. Use typewriter to append gradually."
-        },
-        "dzcWriter.typewriterIntervalMs": {
-          "type": "number",
-          "default": 1000,
-          "description": "Delay between typewriter append ticks, in milliseconds."
+          "description": "How generated content is appended to the active editor. Use typewriter to simulate natural programmer typing."
         },
         "dzcWriter.typewriterCharsPerTick": {
           "type": "number",
           "default": 1,
-          "description": "Number of characters inserted on each typewriter append tick."
+          "description": "Number of characters inserted on each typewriter tick. Keep this at 1 for the most natural effect."
         },
         "dzcWriter.showNotifications": {
           "type": "boolean",
