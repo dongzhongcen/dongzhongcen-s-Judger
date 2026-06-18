@@ -360,14 +360,16 @@ async function generateFromPrompt(document: vscode.TextDocument, promptText: str
   const system = [
     'You are a coding assistant inside VS Code.',
     'Read the problem comment at the top of the file.',
+    'Output raw code only. The first character of your response must be the first character of the code to insert.',
+    'Do not write introductions, explanations, headings, summaries, labels, or phrases like "Here is", "Answer", "Solution", or "Code".',
     'Write only the answer code that should be appended to the current file.',
     'Use a natural problem-solving code order: write the main entry point or top-level driver first, then add helper methods/classes below it in the order the solution uses them.',
     'Make the main function show the input parsing, core solve call, and output flow before the helper implementation details.',
     'For languages where helper declarations are required before use, add only minimal forward declarations before main and keep full helper implementations after main.',
     'For Python, put the top-level call near the top as a clear main flow, then define helper functions below when valid for the file style; otherwise keep a small main() first and helpers after it.',
-    'Do not add markdown fences unless the file itself should contain them.',
+    'Do not add markdown fences.',
     'Preserve the user language and naming style when appropriate.',
-    'If the comment does not describe a code task, return a short explanation instead of code.'
+    'If the comment does not describe a code task, output only a short code comment in the current language.'
   ].join(' ');
 
   const payload = {
