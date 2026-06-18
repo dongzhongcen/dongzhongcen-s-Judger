@@ -22,6 +22,8 @@ type TestCase = {
   error?: string;
 };
 
+type AppendMode = 'instant' | 'typewriter';
+
 let goalMode = false;
 let lastGeneratedText = '';
 let lastDetectedPrompt: DetectedPrompt | null = null;
@@ -435,18 +437,47 @@ async function appendGeneratedTextToEditor(
   generated: string,
   detected: DetectedPrompt
 ) {
-  const edit = new vscode.WorkspaceEdit();
-  const endPosition = editor.document.lineAt(editor.document.lineCount - 1).range.end;
+  await appendTextToEditor(editor, generated);
+  lastGeneratedText = generated;
+  await showOptionalInformationMessage('Generated answer appended to active file.');
+  outputChannel.appendLine(`Appended generated text for prompt starting at line ${detected.promptRange.start.line + 1}.`);
+}
+
+async function appendTextToEditor(editor: vscode.TextEditor, text: string): Promise<void> {
   const existingText = editor.document.getText();
   const separator = existingText.endsWith('\n') || existingText.length === 0 ? '\n' : '\n\n';
-  edit.insert(editor.document.uri, endPosition, `${separator}${generated}\n`);
+  const content = `${separator}${text.trim()}\n`;
+  const config = vscode.workspace.getConfiguration('dzcWriter');
+  const appendMode = config.get<AppendMode>('appendMode', 'typewriter');
+
+  if (appendMode !== 'typewriter') {
+    await insertTextAtDocumentEnd(editor, content);
+    return;
+  }
+
+  const intervalMs = Math.max(0, config.get<number>('typewriterIntervalMs', 1000));
+  const charsPerTick = Math.max(1, config.get<number>('typewriterCharsPerTick', 1));
+
+  for (let index = 0; index < content.length; index += charsPerTick) {
+    await insertTextAtDocumentEnd(editor, content.slice(index, index + charsPerTick));
+    if (index + charsPerTick < content.length) {
+      await delay(intervalMs);
+    }
+  }
+}
+
+async function insertTextAtDocumentEnd(editor: vscode.TextEditor, text: string): Promise<void> {
+  const edit = new vscode.WorkspaceEdit();
+  const currentEndPosition = editor.document.lineAt(editor.document.lineCount - 1).range.end;
+  edit.insert(editor.document.uri, currentEndPosition, text);
   const success = await vscode.workspace.applyEdit(edit);
   if (!success) {
     throw new Error('Failed to append generated text.');
   }
-  lastGeneratedText = generated;
-  await showOptionalInformationMessage('Generated answer appended to active file.');
-  outputChannel.appendLine(`Appended generated text for prompt starting at line ${detected.promptRange.start.line + 1}.`);
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function applyLastResult() {
@@ -467,15 +498,8 @@ async function applyLastResult() {
   if (choice !== 'Append') {
     return;
   }
-  const edit = new vscode.WorkspaceEdit();
-  const endPosition = editor.document.lineAt(editor.document.lineCount - 1).range.end;
-  const existingText = editor.document.getText();
-  const separator = existingText.endsWith('\n') || existingText.length === 0 ? '\n' : '\n\n';
-  edit.insert(editor.document.uri, endPosition, `${separator}${lastGeneratedText.trim()}\n`);
-  const ok = await vscode.workspace.applyEdit(edit);
-  if (ok) {
-    showOptionalInformationMessage('Last generated result appended.');
-  }
+  await appendTextToEditor(editor, lastGeneratedText);
+  showOptionalInformationMessage('Last generated result appended.');
 }
 
 async function showPromptPreview(detected: DetectedPrompt) {
@@ -1205,7 +1229,6 @@ class GoalWriterPanelProvider implements vscode.WebviewViewProvider {
 
     <div class="footer">
       <div class="status">${escapeHtml(this.status)}</div>
-      <div class="credit">Created by dongzhongcen</div>
     </div>
   </div>
 

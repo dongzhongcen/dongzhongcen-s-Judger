@@ -87,6 +87,9 @@ Full example:
   "dzcWriter.apiKey": "YOUR_OPENAI_API_KEY",
   "dzcWriter.model": "gpt-4.1",
   "dzcWriter.confirmBeforeApply": false,
+  "dzcWriter.appendMode": "typewriter",
+  "dzcWriter.typewriterIntervalMs": 1000,
+  "dzcWriter.typewriterCharsPerTick": 1,
   "dzcWriter.showNotifications": false,
   "dzcWriter.apiBaseUrl": "https://api.openai.com/v1",
   "dzcWriter.uiLanguage": "en"
@@ -98,9 +101,32 @@ Field meaning:
 - `dzcWriter.apiKey`: Your OpenAI API key. Do not share it or commit it to GitHub.
 - `dzcWriter.model`: The model used to generate code.
 - `dzcWriter.confirmBeforeApply`: Whether to ask before appending generated content.
+- `dzcWriter.appendMode`: How generated content is appended. Use `"instant"` for normal one-time append or `"typewriter"` for gradual append.
+- `dzcWriter.typewriterIntervalMs`: Delay between typewriter append ticks. Default is `1000`, which means once per second.
+- `dzcWriter.typewriterCharsPerTick`: Number of characters appended on each typewriter tick. Default is `1`.
 - `dzcWriter.showNotifications`: Whether to show non-error VS Code notification messages. Set it to `false` to keep the extension quiet.
 - `dzcWriter.apiBaseUrl`: API base URL. Default is the official OpenAI endpoint.
 - `dzcWriter.uiLanguage`: Sidebar language. Use `"en"` or `"zh"`.
+
+### Append Mode
+
+By default, generated content is appended one character at a time, once per second:
+
+```json
+{
+  "dzcWriter.appendMode": "typewriter",
+  "dzcWriter.typewriterIntervalMs": 1000,
+  "dzcWriter.typewriterCharsPerTick": 1
+}
+```
+
+To append generated content all at once:
+
+```json
+{
+  "dzcWriter.appendMode": "instant"
+}
+```
 
 If you use a compatible proxy or relay service, change only `apiBaseUrl`:
 
@@ -133,6 +159,9 @@ Important settings:
 - `dzcWriter.apiBaseUrl`
 - `dzcWriter.autoGenerate`
 - `dzcWriter.confirmBeforeApply`
+- `dzcWriter.appendMode`
+- `dzcWriter.typewriterIntervalMs`
+- `dzcWriter.typewriterCharsPerTick`
 - `dzcWriter.showNotifications`
 - `dzcWriter.uiLanguage`
 - `dzcWriter.runTimeoutMs`
@@ -162,13 +191,13 @@ npm run package
 After packaging, a file like this will be generated:
 
 ```text
-dzc-writer-0.3.4.vsix
+dzc-writer-0.3.9.vsix
 ```
 
 Install it in VS Code:
 
 ```bash
-code --install-extension dzc-writer-0.3.4.vsix
+code --install-extension dzc-writer-0.3.9.vsix
 ```
 
 Or install from the VS Code UI:
